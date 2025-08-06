@@ -43,7 +43,7 @@ export class ProjectController {
             if(!project)
             {
                 const error = new Error('Proyecto no encontrado!!!');
-                return res.json({ error: error.message })
+                return res.status(404).json({ error: error.message });
             }
 
             res.json(project);
@@ -63,7 +63,7 @@ export class ProjectController {
             if(!project)
             {
                 const error = new Error('Proyecto no encontrado!!!');
-                return res.json({ error: error.message })
+                return res.status(404).json({ error: error.message });
             }
 
             project.clientName = req.body.clientName;
@@ -91,7 +91,7 @@ export class ProjectController {
             if(!project)
             {
                 const error = new Error('Proyecto no encontrado!!!');
-                return res.json({ error: error.message })
+                return res.status(404).json({ error: error.message });
             }
 
             // se guarda el objeto modificado
