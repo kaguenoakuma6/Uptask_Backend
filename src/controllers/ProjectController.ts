@@ -58,7 +58,7 @@ export class ProjectController {
         const { id } = req.params;
         try 
         {
-            const project = await Project.findById(id, req.body);
+            const project = await Project.findById(id);
 
             if(!project)
             {
@@ -86,7 +86,7 @@ export class ProjectController {
         const { id } = req.params;
         try 
         {
-            const project = await Project.findById(id, req.body);
+            const project = await Project.findById(id);
 
             if(!project)
             {
