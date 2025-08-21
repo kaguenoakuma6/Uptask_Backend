@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
 import { connectDB } from './config/db';
+import authRoutes from './routes/authRoutes';
 import projectRoutes from './routes/projectRoutes';
 import { corsConfig } from './config/cors';
 
@@ -22,7 +23,8 @@ app.use(morgan('dev'));
 // Habilitar el uso de JSON
 app.use(express.json());
 
-// Rutas 
+// Rutas
+app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 
 export default app;
