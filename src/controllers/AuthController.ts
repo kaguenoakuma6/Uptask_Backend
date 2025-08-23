@@ -32,7 +32,7 @@ export class AuthController
             token.user = user.id;
 
             // Eviar Email
-            AuthEmail.senConfirmationEmail({
+            AuthEmail.sendConfirmationEmail({
                 email: user.email,
                 name: user.name,
                 token: token.token
@@ -96,7 +96,7 @@ export class AuthController
                 await token.save();
 
                 // Eviar Email
-                AuthEmail.senConfirmationEmail({
+                AuthEmail.sendConfirmationEmail({
                     email: userBD.email,
                     name: userBD.name,
                     token: token.token
@@ -119,7 +119,130 @@ export class AuthController
         } 
         catch (error) 
         {
-            res.status(500).json({ error: 'Ocurrio un Error al Crear la Cuenta' });
+            res.status(500).json({ error: 'Ocurrio un Error al Autenticar' });
+        }
+    }
+
+    static resendCode = async (req: Request, res: Response) => {
+        try {
+
+            const { email } = req.body;
+            const userBD = await User.findOne({email});
+
+            if(!userBD)
+            {
+                const error = new Error('El Usuario No Existe');
+                return res.status(404).json({error: error.message});
+            }
+
+            if(userBD.confirmed)
+            {
+                const error = new Error('El Usuario Ya ha Sido Confirmado!!');
+                return res.status(403).json({error: error.message});
+            }
+
+            // Generar token
+            const token = new Token();
+            token.token = generateToken();
+            token.user = userBD.id;
+
+            await token.save();
+
+            // Eviar Email
+            AuthEmail.sendConfirmationEmail({
+                email: userBD.email,
+                name: userBD.name,
+                token: token.token
+            });
+
+            res.send('Token Enviado Correctamente!');
+
+        } 
+        catch (error) 
+        {
+            res.status(500).json({ error: 'Ocurrio un Error al Reenviar el Token' });
+        }
+    }
+
+    static forgotPassword = async (req: Request, res: Response) => {
+        try {
+
+            const { email } = req.body;
+            const userBD = await User.findOne({email});
+
+            if(!userBD)
+            {
+                const error = new Error('El Usuario No Existe');
+                return res.status(404).json({error: error.message});
+            }
+
+            // Generar token
+            const token = new Token();
+            token.token = generateToken();
+            token.user = userBD.id;
+
+            await token.save();
+
+            // Eviar Email
+            AuthEmail.sendResetPwdEmail({
+                email: userBD.email,
+                name: userBD.name,
+                token: token.token
+            });
+
+            res.send('Revisa tu Email y sigue las instrucciones');
+
+        } 
+        catch (error) 
+        {
+            res.status(500).json({ error: 'Ocurrio un Error al Enviar el token Para Reestablecer la Contraseña' });
+        }
+    }
+
+    static validateToken = async (req: Request, res: Response) => {
+        try 
+        {
+            const { token } = req.body;
+
+            const tokenBD = await Token.findOne({token});
+
+            if(!tokenBD)
+            {
+                const error = new Error('Token No Valido');
+                return res.status(404).json({error: error.message});
+            }
+
+            res.send('Token Válido, Captura tu Nueva Contraseña!');
+        } 
+        catch (error) 
+        {
+            res.status(500).json({ error: 'Ocurrio un Error al Validar el Token!!' });
+        }
+    }
+
+    static updatePassword = async (req: Request, res: Response) => {
+        try 
+        {
+            const { token } = req.params;
+
+            const tokenBD = await Token.findOne({token});
+
+            if(!tokenBD)
+            {
+                const error = new Error('Token No Valido');
+                return res.status(404).json({error: error.message});
+            }
+
+            const userBD = await User.findById(tokenBD.user);
+            userBD.password = await hashPassword(req.body.password);
+
+            await Promise.allSettled([userBD.save(), tokenBD.deleteOne()]);
+
+            res.send('Contraseña Actualizada Correctamente!');
+        } 
+        catch (error) 
+        {
+            res.status(500).json({ error: 'Ocurrio un Error al Validar el Token!!' });
         }
     }
 }
