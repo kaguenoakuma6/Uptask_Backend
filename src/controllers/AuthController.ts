@@ -4,8 +4,8 @@ import User from '../models/User';
 import { checkPassword, hashPassword } from '../utils/auth';
 import Token from '../models/Token';
 import { generateToken } from '../utils/token';
-import { transporter } from '../config/nodemailer';
 import { AuthEmail } from '../emails/AuthEmail';
+import { generateJWT } from '../utils/jwt';
 
 export class AuthController 
 {
@@ -114,7 +114,9 @@ export class AuthController
                 return res.status(401).json({error: error.message});
             }
 
-            res.send('Autenticacion correcta');
+            const token = generateJWT({id: userBD.id});
+
+            res.send(token);
             
         } 
         catch (error) 
@@ -244,5 +246,9 @@ export class AuthController
         {
             res.status(500).json({ error: 'Ocurrio un Error al Validar el Token!!' });
         }
+    }
+
+    static user = async (req: Request, res: Response) => {
+        return res.json(req.user);
     }
 }
