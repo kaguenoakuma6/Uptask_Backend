@@ -4,7 +4,7 @@ import { ProjectController } from '../controllers/ProjectController';
 import { handleInputErrors } from '../middleware/validation';
 import { TaskController } from '../controllers/TaskController';
 import { projectExists } from '../middleware/project';
-import { taskExists, taskToProject } from '../middleware/task';
+import { hasAutorization, taskExists, taskToProject } from '../middleware/task';
 import { authenticate } from '../middleware/auth';
 import { TeamMemberController } from '../controllers/TeamController';
 
@@ -45,7 +45,7 @@ router.delete('/:id',
 // Se valida que el proyecto exista y se agrega al request golbal
 router.param('projectId', projectExists);
 
-router.post('/:projectId/tasks', 
+router.post('/:projectId/tasks', hasAutorization,
     body('name').notEmpty().withMessage('El Nombre de la Tarea es Obligatorio'),
     body('description').notEmpty().withMessage('La Descripcion de la Tarea es Obligatoria'),
     handleInputErrors, TaskController.createTask
@@ -63,14 +63,14 @@ router.get('/:projectId/tasks/:taskId',
     handleInputErrors,TaskController.getTaskById
 );
 
-router.put('/:projectId/tasks/:taskId',  
+router.put('/:projectId/tasks/:taskId', hasAutorization,
     param('taskId').isMongoId().withMessage('Id No Válido'),
     body('name').notEmpty().withMessage('El Nombre de la Tarea es Obligatorio'),
     body('description').notEmpty().withMessage('La Descripcion de la Tarea es Obligatoria'),
     handleInputErrors,TaskController.updateTask
 );
 
-router.delete('/:projectId/tasks/:taskId', 
+router.delete('/:projectId/tasks/:taskId', hasAutorization,
     param('taskId').isMongoId().withMessage('Id No Válido'),
     handleInputErrors,TaskController.deleteTask
 );

@@ -42,5 +42,15 @@ export function taskToProject(req:Request, res: Response, next: NextFunction) {
         const error = new Error('La Tarea no Pertenece al Proyecto!!!');
         return res.status(400).json({ error: error.message });
     }
-    next()
+    next();
+}
+
+export function hasAutorization(req:Request, res: Response, next: NextFunction) {
+    
+    if(req.user.id.toString() !== req.project.manager.toString())
+    {
+        const error = new Error('Accion No Válida!!!');
+        return res.status(400).json({ error: error.message });
+    }
+    next();
 }
