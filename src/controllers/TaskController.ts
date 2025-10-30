@@ -41,7 +41,11 @@ export class TaskController {
                 return res.status(400).json({ error: error.message });
             }
 
-            res.json(req.task);
+            const task = await Task.findById(req.task.id)
+                        .populate({path: 'completedBy.user', select: 'id name email'})
+                        .populate({path: 'notes', populate: { path: 'createdBy', select: 'id name email'}});
+
+            res.json(task);
         } 
         catch (error) 
         {
@@ -86,6 +90,10 @@ export class TaskController {
             const { status } = req.body;
 
             req.task.status = status;
+            
+            const data = { user: req.user.id, status };
+
+            req.task.completedBy.push(data);
 
             await req.task.save();
 
